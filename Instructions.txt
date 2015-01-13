@@ -1,0 +1,61 @@
+These instructions will help you to quickly generate a FreeCAD file with this script.
+
+1.  If you have not already done so, download and install the latest version of FreeCAD.
+
+2.  Copy the raw data from your keyboard layout to a new text document  your computer. 
+
+3.  Open up KeyboardCAD.py in a text editor. You will have to modify the lines found in the
+	user parameters section at the very top of the script. This includes the size of the plate,
+	location where you saved the layout data and the file name you will save the document as.
+	
+4.  Once your user parameters are all correct, review the code in the measurements section.
+	The values in that section are all defaults that I derived from various sources. It is likely that
+	you won't have to change anything if you are making a cherry mx board with standard spacing.
+	You should check them anyway. Especially the stabilizer section; make sure that the measurements 
+	are the same as the stabilizers you are going to use.
+	
+5.  (Optional) Populate the screw hole list if you know the x, y coordinates of each hole on the plate.
+
+6.  Save changes to the script and make note of its location on your computer.
+
+7.  Open up a command or terminal window. Once in it, I recommend changing directory to your FreeCAD bin folder, since this 
+	is where the included python program is found. You can use the python that you have installed on your 
+	machine, but this isn't recommended. It would have to the same version of python that FreeCAD uses anyway
+	and you would have to change the two FreeCAD path variables in the script. 
+	
+8.  Enter a command to call the python program with the path to the KeyboardCAD.py as a parameter, thus executing it.
+
+9.  Congratulations! You now have a 3D model of your custom keyboard plate. Open it up and take a look. All the 
+	parts will probably be invisible at first. Ctrl + a will select all objects and space will make them visible.
+	
+10. Unfortunately, the parts in their current form will probably not be of much use to you. Whatever format you
+	want to export them to, you will first have to combine them into one part. This takes a long time for your 
+	computer to do, so it is not included in the script. To combine the parts, go to the part workbench in the dropdown 
+	menu near the top taskbar. Then select all the parts with ctrl + a and click on the intersection (common) function.
+	Then wait. Waiting time varies by your computer's performance and the complexity of your plate, but expect it to be
+	10 - 30 minutes. Check out http://www.freecadweb.org/wiki/index.php?title=Part_Module if you can't find any of the 
+	operations I mentioned.
+	
+Notes:
+
+The main limitation of the script at the moment is that it assumes that the switch is always in the exact middle of the key, 
+according to the x, y, w, h values in the raw data. Keep this in mind when using non-rectangular keys or stepped keys,
+as they add secondary values which will be ignored. Despite this, switch placement seems to be correct for big-ass enter keys
+as well as ISO enter keys, since the templates of these keys included in the editor have proper x,y,w,h values.
+The assumed switch position may seem like a big problem for certain cases, but with clever manipulation of your layout, 
+any possible plate can be made.	
+
+Here are some tips for dealing with some situations you may encounter:
+	
+	1.  If you want cutouts on all four sides of the switch, copy all keys in the layout and place "!r!" in the label of each key
+		in the copy layout. Then move the copy to overlap the original exactly. This way, the script will make two switch cuts
+		for each key, and one will be rotated and thus you will have cutouts on all four sides of the switch.
+		
+	2.  You may want a switch hole to be wide so as to accept multiple key positions or stem locations. For example, you want to 
+		accommodate spacebars with different non-standard stem positions, or you may want the plate to accept keys of multiple widths
+		in one position. To accomplish this, add multiple 1x1 keys in the editor to widen the hole.
+	
+	3.  Similarly, you may want to use keys with off-center stems such as a stepped caps lock key. To accommodate this, simply position 
+		the keys in the editor according to where you want the switch to be, not what the final appearance of the keyboard will be.
+		
+	
