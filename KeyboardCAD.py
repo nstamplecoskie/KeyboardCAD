@@ -12,14 +12,14 @@
 fileName = 'custom keyboard'  #name of the FreeCAD file which will be the result of this script. An extension will be added if not present
 savePath = 'D:/Users/Nick/Desktop/' #path indicating where you want to save the file
 layoutPath = 'D:/Users/Nick/Desktop/layout.txt' # path to a text file containing the raw data from http://www.keyboard-layout-editor.com/
-plateXDim = 381 #overall length of the plate to be made, in mm
-plateYDim = 152.4 #overall width of the plate to be made, in mm
-xStart = 0 #Distance from left edge of plate to first key (not to first switch hole)
-yStart = 0 #Distance from top edge of plate to first key (not to first switch hole)
+plateXDim = 285.75 #overall length of the plate to be made, in mm.
+plateYDim = 95.25 #overall width of the plate to be made, in mm.
+xStart = 0 #How far from the left edge the keyboard will start to be drawn. Not the distance to the first hole, but to the first key.
+yStart = 0 #How far from the top edge the keyboard will start to be drawn.
 plateThickness = 1.5 #plate thickness in mm. 
 includeCutOuts = True #include four cutouts on the plate around each switch for the disassembly of switches while they are installed 
 rotateSwitches = False #rotate all switches with cutouts by 90 degrees (so that cutouts are on the top and bottom)
-includeStabilizers = "costar"  #make cutouts for stabilizers? Possible values: False, "costar", "cherry", "both"
+includeStabilizers = "both"  #make cutouts for stabilizers? Possible values: False, "costar", "cherry", "both"
 
 ###########################################################################
 #LABEL PARAMETERS
@@ -69,8 +69,12 @@ FREECADPATH2 = None #'C://Program Files//FreeCAD 0.14//lib' #path to your FreeCA
 #(OPTIONAL) SCREW HOLES
 ###########################################################################
 #This list of holes must contain tuples (x,y) for the coordinates for where each screw hole will be cut
+#x is the distance from the left edge of the plate to the center of the screw hole.
+#y is the distance from the TOP edge of the plate to the center of the hole.
+# screws = [(20,40),(100,40),(20,100),(100,100)] This is the expected format.
 screws = []
 screwHoleRadius = 1 #the radius of each hole in mm
+
 
 def main():
 	getLayoutData()
@@ -590,7 +594,7 @@ if FREECADPATH and FREECADPATH2:
 try:
 	import FreeCAD	
 	import Sketcher
-except ValueError:
+except Exception:
 	print "error finding FreeCAD"
 else:
 	main()
