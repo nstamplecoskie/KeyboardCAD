@@ -60,8 +60,8 @@ MINIMUMLONGSTABLENGTH = 3 #If key is this wide or wider, use the long stabilizer
 #ADDITIONAL MEASUREMENTS FOR CHERRY
 #These have to do with the additional cut out made for inserting the wire through the plate
 #They can vary without consequence, but the values provided are from official Cherry spec and look the best with standard square switch holes
-#Make DST values 0 or False if you do not want these cutouts
-SHORTWIREDST =  2.11 #vertical distance from top of switch hole to wire cutout for short stabilizers.
+#Make DST values 0 if you do not want these cutouts
+SHORTWIREDST = 2.11 #vertical distance from top of switch hole to wire cutout for short stabilizers.
 SHORTWIREHEIGHT = 10.69 #height of the wire cutout for short stabilizers. Results in a much larger cut out
 LONGWIREDST = 4.71 #vertical distance from top of switch hole to wire cutout for long stabilizers.
 LONGWIREHEIGHT = 4.6 #height of the wire cutout for long stabilizers.
@@ -549,10 +549,10 @@ def drawHorizontalStabilizer(x, y, short, cherry, rotation):
 		pocket(sketchCostarStab(xRight, y, rotation, False))
 
 	if cherry: #for cherry, additional pieces of the plate are cut for passing the wire through
-		if short and SHORTWIREDST:
+		if short and not SHORTWIREDST == 0:
 			wireDst = SHORTWIREDST
 			wireHeight = SHORTWIREHEIGHT
-		elif LONGWIREDST:
+		elif not LONGWIREDST == 0:
 			wireDst = LONGWIREDST
 			wireHeight = LONGWIREHEIGHT
 		else:
@@ -572,7 +572,7 @@ def drawVerticalStabilizer(x, y, cherry, rotation):
 		pocket(sketchCostarStab(x, yBottom, rotation, True))
 		pocket(sketchCostarStab(x, yTop, rotation, True))
 
-	if cherry and SHORTWIREDST: #for cherry, additional pieces of the plate are cut for passing the wire through
+	if cherry and not SHORTWIREDST == 0: #for cherry, additional pieces of the plate are cut for passing the wire through
 		wireDst = SHORTWIREDST
 		wireHeight = SHORTWIREHEIGHT
 		xWire = x + wireDst
@@ -626,9 +626,9 @@ def getLayoutData():
 	parseLayout(readFile())
 	fixRotations()
 	modifyLabels()
-	if not plateXDim:
+	if not plateXDim or plateXDim == 0:
 		calculatePlateXDim()
-	if not plateYDim:
+	if not plateYDim or plateYDim == 0:
 		calculatePlateYDim()
 
 def readFile():
