@@ -61,9 +61,9 @@ MINIMUMLONGSTABLENGTH = 3 #If key is this wide or wider, use the long stabilizer
 #These have to do with the additional cut out made for inserting the wire through the plate
 #They can vary without consequence, but the values provided are from official Cherry spec and look the best with standard square switch holes
 #Make DST values 0 if you do not want these cutouts
-SHORTWIREDST = 2.11 #vertical distance from top of switch hole to wire cutout for short stabilizers.
+SHORTWIREDST = 4.88 #2.11 #vertical distance from center of switch hole (stem) to wire cutout for short stabilizers.
 SHORTWIREHEIGHT = 10.69 #height of the wire cutout for short stabilizers. Results in a much larger cut out
-LONGWIREDST = 4.71 #vertical distance from top of switch hole to wire cutout for long stabilizers.
+LONGWIREDST = 2.287 #4.71 #vertical distance from center of switch hole to wire cutout for long stabilizers.
 LONGWIREHEIGHT = 4.6 #height of the wire cutout for long stabilizers.
 
 ###########################################################################
@@ -364,8 +364,6 @@ def sketchCherryStab(xPos, yPos, left, rotation, vertical):
 	#bottomCutOutPos = assuming it is centered horizontally wrt stab cut out
 	dstFromSwitchCenter = 6.604
 
-	yPos = yPos + SWITCHSIZE/2 #want the vertical center of the switch's yPos
-
 	global doc
 	global sketchCount
 
@@ -408,7 +406,7 @@ def sketchCherryStab(xPos, yPos, left, rotation, vertical):
 	y[11] = y[0]
 
 	if vertical:
-		centerPoint = (xPos, -yPos+SWITCHSIZE/2)
+		centerPoint = (xPos, -yPos)
 		for n in range(len(x)):
 			x[n], y[n] = rotatePoint(centerPoint, (x[n],y[n]), 90)
 
@@ -435,15 +433,12 @@ def sketchCherryStab(xPos, yPos, left, rotation, vertical):
 def sketchCostarStab(xPos, yPos, rotation, vertical):
 	length = 13.97 #Length (or height) of the cutout for costar stabilizers
 	width = 3.3 #Width of the cutout for costar stabilizers
-	if SWITCHSIZE == ALPSHEIGHT: #if ALPS only holes are being used, then the dst has to be different
-		dst = 0.2343
-	else:
-		dst = 0.832 #Distance from the top of the switch and the top of the stabilizer cutout. Make negative to have the stabilizers 'above' the switch.
+	dst = 6.1657 #Vertical distance from the center (stem) of the switch to the top of the stabilizer cutout.
 
 	if vertical:
-		return sketchRectangle(xPos+dst, yPos-width/2, length, width, rotation)
+		return sketchRectangle(xPos-dst, yPos-width/2, length, width, rotation)
 	else:
-		return sketchRectangle(xPos-width/2, yPos+dst, width, length, rotation)
+		return sketchRectangle(xPos-width/2, yPos-dst, width, length, rotation)
 
 def pocket(sketch):
 	global doc
@@ -517,7 +512,7 @@ def drawSwitch(x, y, rotation, rotate90, type):
 def drawStabilizersHelper(cherry):
 	for prop in props:
 		if prop[2] >= 2 or prop[3] >= 2:
-			coord = findCoord(prop[0], prop[1], prop[2], prop[3])
+			coord = findCoordForStab(prop[0], prop[1], prop[2], prop[3])
 			rotation = prop[4]
 			if prop[2] >= MINIMUMLONGSTABLENGTH:#spacebar
 				drawHorizontalStabilizer(coord[0], coord[1], False, cherry, rotation)
@@ -538,8 +533,8 @@ def drawHorizontalStabilizer(x, y, short, cherry, rotation):
 		separation = SHORTSTABILIZERPOSTTOPOST
 	else:
 		separation = LONGSTABILIZERPOSTTOPOST
-	xLeft = x + SWITCHSIZE/2 - separation/2
-	xRight = x + SWITCHSIZE/2 + separation/2
+	xLeft = x - separation/2
+	xRight = x + separation/2
 
 	if cherry:
 		pocket(sketchCherryStab(xLeft, y, True, rotation, False))
@@ -558,13 +553,13 @@ def drawHorizontalStabilizer(x, y, short, cherry, rotation):
 		else:
 			return
 		xWire = xLeft
-		yWire = y + wireDst
+		yWire = y - wireDst
 		pocket(sketchRectangle(xWire, yWire, separation, wireHeight, rotation))
 
 def drawVerticalStabilizer(x, y, cherry, rotation):
 	separation = SHORTSTABILIZERPOSTTOPOST
-	yTop = y + SWITCHSIZE/2 - separation/2
-	yBottom = y + SWITCHSIZE/2 + separation/2
+	yTop = y - separation/2
+	yBottom = y + separation/2
 	if cherry:
 		pocket(sketchCherryStab(x, yBottom, True, rotation, True))
 		pocket(sketchCherryStab(x, yTop, False, rotation, True))
@@ -575,7 +570,7 @@ def drawVerticalStabilizer(x, y, cherry, rotation):
 	if cherry and not SHORTWIREDST == 0: #for cherry, additional pieces of the plate are cut for passing the wire through
 		wireDst = SHORTWIREDST
 		wireHeight = SHORTWIREHEIGHT
-		xWire = x + wireDst
+		xWire = x - wireDst
 		yWire = yTop
 		pocket(sketchRectangle(xWire, yWire, wireHeight, separation, rotation))
 
@@ -588,6 +583,17 @@ def findCoord(x, y, w, h): #calculates where the top left corner of the switch i
 	h = h*KEYUNIT
 	xPos = x + w/2 - SWITCHSIZE/2
 	yPos = y + h/2 - SWITCHSIZE/2
+	xPos = xPos + xStart
+	yPos = yPos + yStart
+	return (xPos, yPos)
+	
+def findCoordForStab(x, y, w, h): #calculates where the exact center (stem) of each switch will be. Used for positioning stabilizers
+	x = x*KEYUNIT
+	y = y*KEYUNIT
+	w = w*KEYUNIT
+	h = h*KEYUNIT
+	xPos = x + w/2
+	yPos = y + h/2
 	xPos = xPos + xStart
 	yPos = yPos + yStart
 	return (xPos, yPos)
