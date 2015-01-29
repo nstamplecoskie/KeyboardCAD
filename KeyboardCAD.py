@@ -79,10 +79,16 @@ FREECADLIBPATH = None #'C://Program Files//FreeCAD 0.14//lib' #path to your Free
 #This list of holes must contain tuples (x,y) for the coordinates for where each screw hole will be cut
 #x is the distance from the left edge of the plate to the center of the screw hole.
 #y is the distance from the TOP edge of the plate to the center of the hole.
-# screws = [(20,40),(100,40),(20,100),(100,100)] This is the expected format.
-screws = []
+screws = [(25.2,27.9),(260.05,27.9),(128.2,48.2),(5,56.5),(280,56.5),(190.5,85.2)] #screw locations for most 60% cases
+#screws = []
 screwHoleRadius = 1.5 #the radius of each hole in mm
 
+###########################################################################
+#(OPTIONAL) FILLET CORNERS
+###########################################################################
+#If this value is not zero, then FreeCAD will fillet, or round, the 4 corners of the plate
+#by the radius specified
+filletRadius = 1.5
 
 def main():
 	getLayoutData()
@@ -90,6 +96,7 @@ def main():
 	drawSwitches()
 	drawStabilizers()
 	drawScrewHoles()
+	fillet()
 	save()
 	intersection()
 
@@ -467,8 +474,31 @@ def joinAllParts():
 	pocketList = []
 	for x in range(sketchCount-1):
 		pocketList.append(doc.getObject("Pocket" + str(x+1)))
+	if filletRadius != 0:
+		for y in range(4):
+			pocketList.append(doc.getObject("Fillet" + str(y+1)))
 	doc.Common.Shapes = pocketList
 	doc.recompute()
+	
+def fillet():
+	if filletRadius != 0:
+		f1 = doc.addObject("PartDesign::Fillet","Fillet1")
+		f1.Base = (doc.Pad, ["Edge1"])
+		f1.Radius = filletRadius
+		
+		f2 = doc.addObject("PartDesign::Fillet","Fillet2")
+		f2.Base = (f1, ["Edge3"])
+		f2.Radius = filletRadius
+		
+		f3 = doc.addObject("PartDesign::Fillet","Fillet3")
+		f3.Base = (f2, ["Edge17"])
+		f3.Radius = filletRadius
+		
+		f4 = doc.addObject("PartDesign::Fillet","Fillet4")
+		f4.Base = (f3, ["Edge15"])
+		f4.Radius = filletRadius
+		
+		doc.recompute()
 
 #Drawing methods
 
