@@ -27,7 +27,7 @@ plateYDim = 0 #overall width of the plate to be made, in mm. If False or zero, s
 xStart = 0 #How far from the left edge the keyboard will start to be drawn. Not the distance to the first hole, but to the first key.
 yStart = 0 #How far from the top edge the keyboard will start to be drawn.
 plateThickness = 1.5 #plate thickness in mm.
-switchHoleType = 1 #0 for standard square, 1 for the "H" shape with cutouts for switch disassembly, 2 for Alps compatible (with switch disassembly for cherry possible).
+switchHoleType = 0 #0 for standard square, 1 for the "H" shape with cutouts for switch disassembly, 2 for Alps compatible (with switch disassembly for cherry possible).
 includeStabilizers = "both"  #make cutouts for stabilizers? Possible values: False, "costar", "cherry", "both"
 rotateSwitches = False #rotate all switches with cutouts or alps compatibility by 90 degrees (so that cutouts are on the top and bottom)
 
@@ -79,16 +79,18 @@ FREECADLIBPATH = None #'C://Program Files//FreeCAD 0.14//lib' #path to your Free
 #This list of holes must contain tuples (x,y) for the coordinates for where each screw hole will be cut
 #x is the distance from the left edge of the plate to the center of the screw hole.
 #y is the distance from the TOP edge of the plate to the center of the hole.
-screws = [(25.2,27.9),(260.05,27.9),(128.2,48.2),(5,56.5),(280,56.5),(190.5,85.2)] #screw locations for most 60% cases
+screws = [(25.2,27.9),(260.05,27.9),(128.2,48.2),(190.5,85.2)] #screw locations for most 60% cases
 #screws = []
-screwHoleRadius = 1.5 #the radius of each hole in mm
+screwHoleRadius = 1.05 #the radius of each hole in mm
+sixtySideHoles = True
+
 
 ###########################################################################
 #(OPTIONAL) FILLET CORNERS
 ###########################################################################
 #If this value is not zero, then FreeCAD will fillet, or round, the 4 corners of the plate
 #by the radius specified
-filletRadius = 1.5
+filletRadius = 0
 
 def main():
 	getLayoutData()
@@ -277,6 +279,89 @@ def sketchCircle(posX, posY, radius):
 
 	return circle
 
+def sketchSideHole(right): #method for just the 2 side holes in the plate of 60% keyboards
+	global doc
+	global sketchCount
+	
+	length = 8 #length doesn't matter. Just has to extend past edge of plate
+	yCenter = -56.5
+	if right:	
+		leftCenter = 280
+		rightCenter = leftCenter + length
+	else:
+		rightCenter = 5
+		leftCenter = rightCenter - length
+		
+	
+	radius = screwHoleRadius
+	slot = doc.addObject('Sketcher::SketchObject','Sketch' + str(sketchCount))
+	
+	slot.Support = (doc.Pad,["Face6"])
+
+	sketchCount = sketchCount + 1
+
+	slot.addGeometry(Part.ArcOfCircle(Part.Circle(App.Vector(leftCenter,yCenter,0),App.Vector(0,0,1),radius),1.570796,-1.570796))
+	slot.addGeometry(Part.ArcOfCircle(Part.Circle(App.Vector(rightCenter,yCenter,0),App.Vector(0,0,1),radius),-1.570796,1.570796))
+	slot.addGeometry(Part.Line(App.Vector(leftCenter,yCenter-radius,0),App.Vector(rightCenter,yCenter-radius,0)))
+	slot.addGeometry(Part.Line(App.Vector(leftCenter,yCenter+radius,0),App.Vector(rightCenter,yCenter+radius,0)))
+	slot.addConstraint(Sketcher.Constraint('Tangent',0,2)) 
+	slot.addConstraint(Sketcher.Constraint('Tangent',0,3)) 
+	slot.addConstraint(Sketcher.Constraint('Tangent',1,2)) 
+	slot.addConstraint(Sketcher.Constraint('Tangent',1,3)) 
+	slot.addConstraint(Sketcher.Constraint('Coincident',0,1,3,1)) 
+	slot.addConstraint(Sketcher.Constraint('Coincident',0,2,2,1)) 
+	slot.addConstraint(Sketcher.Constraint('Coincident',2,2,1,1)) 
+	slot.addConstraint(Sketcher.Constraint('Coincident',3,2,1,2)) 
+	slot.addConstraint(Sketcher.Constraint('Horizontal',2)) 
+	slot.addConstraint(Sketcher.Constraint('Equal',0,1)) 
+	
+	slot.addConstraint(Sketcher.Constraint('DistanceX',1,3,rightCenter)) 	
+	slot.addConstraint(Sketcher.Constraint('DistanceY',1,3,yCenter)) 
+	slot.addConstraint(Sketcher.Constraint('DistanceX',0,3,1,3,length))
+	slot.addConstraint(Sketcher.Constraint('DistanceY',0,2,0,3,radius))
+
+	doc.recompute()	
+	return slot
+	
+def sketchMiddleHole(): #method for just the middle hole of 60% keyboards
+	global doc
+	global sketchCount
+	
+	#original position: (128.2,48.2)
+	length = 3
+	x = 128.7
+	bottomY = -48.2
+	topY = bottomY + length
+	radius = screwHoleRadius
+	slot = doc.addObject('Sketcher::SketchObject','Sketch' + str(sketchCount))
+	
+	slot.Support = (doc.Pad,["Face6"])
+
+	sketchCount = sketchCount + 1
+	
+	slot.addGeometry(Part.ArcOfCircle(Part.Circle(App.Vector(x,topY,0),App.Vector(0,0,1),radius),0,3.141592))
+	slot.addGeometry(Part.ArcOfCircle(Part.Circle(App.Vector(x,bottomY,0),App.Vector(0,0,1),radius),3.141592,0))
+	slot.addGeometry(Part.Line(App.Vector(x-radius,topY,0),App.Vector(x-radius,bottomY,0)))
+	slot.addGeometry(Part.Line(App.Vector(x+radius,topY,0),App.Vector(x+radius,bottomY,0)))
+	slot.addConstraint(Sketcher.Constraint('Tangent',0,2)) 
+	slot.addConstraint(Sketcher.Constraint('Tangent',0,3)) 
+	slot.addConstraint(Sketcher.Constraint('Tangent',1,2)) 
+	slot.addConstraint(Sketcher.Constraint('Tangent',1,3)) 
+	slot.addConstraint(Sketcher.Constraint('Coincident',0,1,3,1)) 
+	slot.addConstraint(Sketcher.Constraint('Coincident',0,2,2,1)) 
+	slot.addConstraint(Sketcher.Constraint('Coincident',2,2,1,1)) 
+	slot.addConstraint(Sketcher.Constraint('Coincident',3,2,1,2)) 
+	slot.addConstraint(Sketcher.Constraint('Vertical',2)) 
+	slot.addConstraint(Sketcher.Constraint('Equal',0,1)) 
+	
+	slot.addConstraint(Sketcher.Constraint('DistanceX',1,3,x)) 	
+	slot.addConstraint(Sketcher.Constraint('DistanceY',1,3,bottomY)) 
+	slot.addConstraint(Sketcher.Constraint('DistanceY',0,3,1,3,-length))
+	slot.addConstraint(Sketcher.Constraint('DistanceX',1,3,1,2,radius))
+	
+	doc.recompute()	
+	return slot
+
 def sketchAlpsComSwitch(posX, posY, rotation, rotate90):
 	global doc
 	global sketchCount
@@ -438,9 +523,11 @@ def sketchCherryStab(xPos, yPos, left, rotation, vertical):
 	return rectangle
 
 def sketchCostarStab(xPos, yPos, rotation, vertical):
-	length = 13.97 #Length (or height) of the cutout for costar stabilizers
-	width = 3.3 #Width of the cutout for costar stabilizers
-	dst = 6.1657 #Vertical distance from the center (stem) of the switch to the top of the stabilizer cutout.
+	# length = 13.97 #Length (or height) of the cutout for costar stabilizers
+	# width = 3.3 #Width of the cutout for costar stabilizers
+	length = 14 #Length (or height) of the cutout for costar stabilizers
+	width = 3.5 #Width of the cutout for costar stabilizers
+	dst = 6.2477 #Vertical distance from the center (stem) of the switch to the top of the stabilizer cutout.
 
 	if vertical:
 		return sketchRectangle(xPos-dst, yPos-width/2, length, width, rotation)
@@ -528,8 +615,11 @@ def drawStabilizers():
 			return
 
 def drawScrewHoles():
-	for screw in screws:
-		pocket(sketchCircle(screw[0], screw[1], screwHoleRadius))
+	if sixtySideHoles:
+		drawSixtyScrewHoles()
+	else:
+		for screw in screws:
+			pocket(sketchCircle(screw[0], screw[1], screwHoleRadius))
 
 def drawSwitch(x, y, rotation, rotate90, type):
 	if type == 0:
@@ -604,6 +694,17 @@ def drawVerticalStabilizer(x, y, cherry, rotation):
 		yWire = yTop
 		pocket(sketchRectangle(xWire, yWire, wireHeight, separation, rotation))
 
+def drawSixtyScrewHoles(): #for compatibilty with universal 60 percent keyboard cases
+	global screwHoleRadius
+	screwHoleRadius = 1.15 #M2 (2 mm diameter) screws will always be used for 60 percent cases
+	#Adding .3 mm to the diameter of the holes for the sake of inconsistency
+	sixtyScrews = [(25.2,27.9),(260.05,27.9),(190.5,85.2)]
+	for screw in sixtyScrews:
+		pocket(sketchCircle(screw[0], screw[1], screwHoleRadius))
+	pocket(sketchSideHole(True))
+	pocket(sketchSideHole(False))
+	pocket(sketchMiddleHole())
+	
 #Calculation methods
 
 def findCoord(x, y, w, h): #calculates where the top left corner of the switch is, given that each switch will be in the exact middle of the key
