@@ -79,10 +79,10 @@ FREECADLIBPATH = None #'C://Program Files//FreeCAD 0.14//lib' #path to your Free
 #This list of holes must contain tuples (x,y) for the coordinates for where each screw hole will be cut
 #x is the distance from the left edge of the plate to the center of the screw hole.
 #y is the distance from the TOP edge of the plate to the center of the hole.
-screws = [(25.2,27.9),(260.05,27.9),(128.2,48.2),(190.5,85.2)] #screw locations for most 60% cases
-#screws = []
+#screws = [(25.2,27.9),(260.05,27.9),(128.2,48.2),(190.5,85.2)] #screw locations for most 60% cases
+screws = []
 screwHoleRadius = 1.05 #the radius of each hole in mm
-sixtySideHoles = True
+sixtySideHoles = False
 
 
 ###########################################################################
